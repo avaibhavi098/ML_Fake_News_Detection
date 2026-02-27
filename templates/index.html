@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fake News Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>📰 Fake News Detection System</h1>
+    <p class="subtitle">AI-powered news verification</p>
+
+    <textarea id="newsText" placeholder="Paste news here..."></textarea>
+    <button onclick="checkNews()">Check News</button>
+
+    <div id="resultBox" class="hidden">
+        <h2 id="prediction"></h2>
+
+        <div class="confidence">
+            <div class="bar">
+                <div id="confidenceBar"></div>
+            </div>
+            <p id="confidenceText"></p>
+        </div>
+
+        <div class="explain">
+            <h3>🧠 Explanation</h3>
+            <p>
+                The model analyzes word frequency, sensational language,
+                and linguistic patterns common in fake news.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
