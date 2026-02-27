@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 
 # ===============================
-# Load Datasets (BULLETPROOF)
+# Load Datasets
 # ===============================
 fake_path = os.path.join(DATA_DIR, "Fake.csv")
 true_path = os.path.join(DATA_DIR, "True.csv")
@@ -31,6 +31,12 @@ true = pd.read_csv(
 )
 
 # ===============================
+# Clean Column Names
+# ===============================
+fake.columns = fake.columns.str.strip().str.lower()
+true.columns = true.columns.str.strip().str.lower()
+
+# ===============================
 # Label Assignment
 # ===============================
 fake["label"] = 0
@@ -43,8 +49,11 @@ df = pd.concat([fake, true], axis=0)
 df = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
 # ===============================
-# Features & Target
+# Ensure 'text' Column Exists
 # ===============================
+if "text" not in df.columns:
+    raise ValueError(f"'text' column not found. Available columns: {df.columns}")
+
 X = df["text"]
 y = df["label"]
 
