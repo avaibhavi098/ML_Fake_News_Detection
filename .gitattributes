@@ -1,2 +1,4 @@
-*.pkl filter=lfs diff=lfs merge=lfs -text
+# Model files are small (~4KB and ~21KB) and tracked directly in git to avoid 132-byte LFS pointer issues on cloud deployment platforms
+# Large raw datasets only (if any):
 *.csv filter=lfs diff=lfs merge=lfs -text
+

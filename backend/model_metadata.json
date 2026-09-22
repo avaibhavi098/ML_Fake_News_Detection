@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "algorithm": "Logistic Regression + TF-IDF (Unigram & Bigram)",
+  "created_at": "2026-09-22T06:19:25.539038Z",
+  "uncertainty_threshold": 65,
+  "bias_mitigation": "Scrubbed Reuters and news agency datelines",
+  "dataset_split": {
+    "train": 560,
+    "validation": 120,
+    "test": 120
+  },
+  "test_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "confusion_matrix": [
+      [
+        60,
+        0
+      ],
+      [
+        0,
+        60
+      ]
+    ]
+  }
+}

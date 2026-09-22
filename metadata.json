@@ -1,6 +1,6 @@
 {
   "name": "Fake News Detection",
-  "description": "AI-powered news verification and fake news detection system.",
+  "description": "AI-powered news verification with Explainable AI (XAI), supplementary Gemini assistant, SQLite prediction history, and analytics dashboard.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

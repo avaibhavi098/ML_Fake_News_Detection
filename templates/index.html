@@ -3,46 +3,589 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AI-powered news verification and fake news detection system.">
-    <meta property="og:title" content="Fake News Detection">
-    <meta property="og:description" content="AI-powered news verification and fake news detection system.">
-    <title>Fake News Detection</title>
+    <meta name="description" content="AI-powered news verification with Explainable AI (XAI) feature attribution, Gemini assistant, and SQLite prediction history.">
+    <meta property="og:title" content="Fake News Detection System with XAI">
+    <meta property="og:description" content="AI-powered news verification with Explainable AI (XAI) feature attribution and analytics dashboard.">
+    <title>Fake News Detection System with XAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>📰 Fake News Detection System</h1>
-    <p class="subtitle">AI-powered news verification <span class="version-tag">v2.0.0</span></p>
-
-    <textarea id="newsText" placeholder="Paste news here..."></textarea>
-    
-    <div class="sample-actions">
-        <span class="sample-label">Try sample:</span>
-        <button type="button" class="btn-sample" onclick="fillSample('real')">Real</button>
-        <button type="button" class="btn-sample" onclick="fillSample('fake')">Fake</button>
-        <button type="button" class="btn-sample" onclick="fillSample('uncertain')">Uncertain</button>
-        <button type="button" class="btn-sample btn-clear" onclick="fillSample('clear')">Clear</button>
-    </div>
-
-    <button id="btnCheck" onclick="checkNews()">Check News</button>
-
-    <div id="resultBox" class="hidden">
-        <h2 id="prediction"></h2>
-
-        <div class="confidence">
-            <div class="bar">
-                <div id="confidenceBar"></div>
+<div class="app-layout">
+    <!-- Top Modern Application Header -->
+    <header class="app-header" role="banner">
+        <div class="header-container">
+            <div class="brand-group">
+                <div class="brand-logo" aria-hidden="true">
+                    <span class="logo-pulse"></span>
+                    <span class="logo-icon">📰</span>
+                </div>
+                <div class="brand-text">
+                    <div class="brand-title-row">
+                        <h1 class="brand-title">Fake News Detection</h1>
+                        <span class="system-badge" title="Explainable AI version 2.1.0">v2.1.0 XAI</span>
+                        <span class="status-indicator" title="Model Engine Ready">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Online</span>
+                        </span>
+                    </div>
+                    <p class="brand-subtitle">
+                        Multi-signal textual veracity evaluation with Explainable AI (XAI) feature attribution &amp; verification history
+                    </p>
+                </div>
             </div>
-            <p id="confidenceText"></p>
+
+            <!-- Global Status Pills -->
+            <div class="header-meta">
+                <div class="meta-pill" title="Trained Classifier Pipeline">
+                    <span class="pill-dot blue"></span>
+                    <span>TF-IDF + Logistic Reg</span>
+                </div>
+                <div class="meta-pill" title="Local Persistence">
+                    <span class="pill-dot cyan"></span>
+                    <span>SQLite Storage</span>
+                </div>
+            </div>
         </div>
 
-        <div class="explain">
-            <h3>🧠 Explanation</h3>
-            <p id="explainText">
-                The model analyzes word frequency, sensational language,
-                and linguistic patterns common in fake news.
+        <!-- Modern Main Navigation Tabs -->
+        <nav class="nav-tabs" role="tablist" aria-label="Primary Application Navigation">
+            <div class="nav-container">
+                <button id="tabBtnDetector" class="tab-btn active" role="tab" aria-selected="true" aria-controls="viewDetector" onclick="switchTab('detector')">
+                    <span class="tab-icon">🔍</span>
+                    <span class="tab-label">Analyze</span>
+                </button>
+                <button id="tabBtnHistory" class="tab-btn" role="tab" aria-selected="false" aria-controls="viewHistory" onclick="switchTab('history')">
+                    <span class="tab-icon">📜</span>
+                    <span class="tab-label">History</span>
+                    <span id="historyCountBadge" class="tab-badge" aria-label="Total records">0</span>
+                </button>
+                <button id="tabBtnAnalytics" class="tab-btn" role="tab" aria-selected="false" aria-controls="viewAnalytics" onclick="switchTab('analytics')">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-label">Analytics</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main" role="main">
+        <!-- ==========================================
+             TAB 1: ANALYZE VIEW
+             ========================================== -->
+        <section id="viewDetector" class="tab-view active" role="tabpanel" aria-labelledby="tabBtnDetector">
+            <div class="view-grid-layout">
+                <!-- Left/Primary: Input Editor Card -->
+                <div class="main-input-card card">
+                    <div class="card-header-row">
+                        <div>
+                            <h2 class="section-title">Input News Article</h2>
+                            <p class="section-desc">Paste a full news story, article excerpt, or headline to inspect stylistic and lexical veracity markers.</p>
+                        </div>
+                        <div class="input-actions-quick">
+                            <span class="quick-label">Presets:</span>
+                            <div class="preset-group">
+                                <button type="button" class="btn-chip" onclick="fillSample('real')" title="Load an objective, factual report">🟢 Real News</button>
+                                <button type="button" class="btn-chip" onclick="fillSample('fake')" title="Load a clickbait, sensational story">🔴 Fake News</button>
+                                <button type="button" class="btn-chip" onclick="fillSample('uncertain')" title="Load ambiguous, neutral text">🟡 Uncertain</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Textarea with Live Counters -->
+                    <div class="textarea-wrapper">
+                        <textarea 
+                            id="newsText" 
+                            rows="7"
+                            placeholder="Paste article headline or paragraph here to analyze for sensationalism, linguistic veracity cues, and credibility patterns..." 
+                            aria-label="News article text for analysis"
+                            oninput="updateTextCounters()"
+                        ></textarea>
+                        <div class="textarea-footer">
+                            <div class="text-stats" id="textStats">
+                                <span id="wordCount">0 words</span>
+                                <span class="stats-sep">•</span>
+                                <span id="charCount">0 characters</span>
+                            </div>
+                            <div class="textarea-btns">
+                                <button type="button" class="btn-text-action" onclick="fillSample('clear')" title="Clear textarea">
+                                    <span>✕ Clear</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Primary Action Row -->
+                    <div class="action-submit-row">
+                        <button id="btnCheck" class="btn-primary-neon" onclick="checkNews()">
+                            <span class="btn-icon">⚡</span>
+                            <span class="btn-text">Analyze News Article</span>
+                        </button>
+                        <p class="submit-hint">Evaluates linguistic patterns, TF-IDF feature attribution, and credibility probabilities.</p>
+                    </div>
+
+                    <!-- Auto-Save Status Banner -->
+                    <div id="saveStatusNotice" class="save-status-banner hidden" role="status">
+                        <div class="save-banner-content">
+                            <span class="save-icon">💾</span>
+                            <span>Prediction auto-recorded to persistent history database.</span>
+                        </div>
+                        <button type="button" class="btn-link" onclick="switchTab('history')">View in History →</button>
+                    </div>
+                </div>
+
+                <!-- Right/Results Section -->
+                <div id="resultBox" class="results-wrapper hidden" aria-live="polite">
+                    <!-- Cards Grid: Prediction Verdict & Confidence -->
+                    <div class="verdict-grid">
+                        <!-- Card 1: Prediction Verdict -->
+                        <div class="verdict-card card" id="verdictCard">
+                            <div class="card-eyebrow">Classification Verdict</div>
+                            <div class="verdict-display">
+                                <h3 id="prediction" class="prediction-headline">--</h3>
+                                <span class="model-tag" id="modelVersionTag">Model v2.1.0</span>
+                            </div>
+                            <p id="verdictDetailText" class="verdict-detail">Evaluated using trained scikit-learn Logistic Regression classifier.</p>
+                        </div>
+
+                        <!-- Card 2: Visual Confidence Indicator -->
+                        <div class="confidence-card card" id="confidenceCard">
+                            <div class="card-eyebrow">Calibrated Model Confidence</div>
+                            <div class="confidence-number-row">
+                                <span id="confidenceText" class="confidence-pct">0%</span>
+                                <span id="confidenceBadge" class="confidence-badge">Evaluating</span>
+                            </div>
+                            <!-- Modern Visual Gauge Bar -->
+                            <div class="confidence-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <div id="confidenceBar" class="confidence-fill">
+                                    <div class="confidence-fill-glow"></div>
+                                </div>
+                            </div>
+                            <div class="confidence-scale-labels">
+                                <span>50% (Uncertain Threshold)</span>
+                                <span>100% (High Confidence)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Explainable AI (XAI) Attribution Card -->
+                    <div class="xai-card card" id="xaiCard">
+                        <div class="card-header-styled">
+                            <div class="header-with-icon">
+                                <span class="card-icon">🧠</span>
+                                <div>
+                                    <h3 class="card-heading">Explainable AI: Why this prediction?</h3>
+                                    <p class="card-subheading">Model feature attribution exposing exact lexical markers driving the decision</p>
+                                </div>
+                            </div>
+                            <span class="tech-badge">Linear XAI Weights</span>
+                        </div>
+
+                        <!-- Dynamic Explanation Text -->
+                        <div class="explain-summary-box">
+                            <p id="explainText" class="explain-text">
+                                The prediction was influenced by specific lexical cues and structural markers in the submitted text.
+                            </p>
+                        </div>
+
+                        <!-- 2-Column Evidence Grid: Real vs Fake Terms -->
+                        <div class="evidence-columns">
+                            <!-- Real Evidence Column -->
+                            <div class="evidence-box evidence-real">
+                                <div class="evidence-box-header">
+                                    <span class="evidence-dot real"></span>
+                                    <h4>Important REAL-Associated Terms</h4>
+                                </div>
+                                <div id="realEvidenceList" class="evidence-tags-flow">
+                                    <span class="no-evidence-text">No authoritative markers detected</span>
+                                </div>
+                            </div>
+
+                            <!-- Fake Evidence Column -->
+                            <div class="evidence-box evidence-fake">
+                                <div class="evidence-box-header">
+                                    <span class="evidence-dot fake"></span>
+                                    <h4>Important FAKE-Associated Terms</h4>
+                                </div>
+                                <div id="fakeEvidenceList" class="evidence-tags-flow">
+                                    <span class="no-evidence-text">No sensational cues detected</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- In-Context Highlighting -->
+                        <div class="incontext-box">
+                            <div class="incontext-header">
+                                <span class="card-icon-small">🔍</span>
+                                <h4>In-Context Text Evidence Highlighting</h4>
+                            </div>
+                            <p class="incontext-hint">
+                                Direct visual overlay: tokens highlighted in <span class="hl-legend-real">green</span> support credibility, while <span class="hl-legend-fake">red</span> highlight sensational or fabricated indicators.
+                            </p>
+                            <div id="highlightedText" class="highlighted-viewport" tabindex="0" role="region" aria-label="Highlighted Text Evidence"></div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Factual-Verification Disclaimer Card -->
+                    <div class="disclaimer-banner card">
+                        <div class="disclaimer-layout">
+                            <span class="disclaimer-alert-icon">⚠️</span>
+                            <div class="disclaimer-content">
+                                <h4 class="disclaimer-title">Model Evidence vs. Fact-Checking Notice</h4>
+                                <p id="disclaimerText" class="disclaimer-body">
+                                    This system analyzes stylistic vocabulary, sensational punctuation, and lexical patterns learned from benchmark datasets. It <strong>does NOT</strong> verify real-world facts against live external databases. A factual article can use colloquial phrasing, and fabricated stories may emulate journalistic prose. Always cross-reference critical claims with primary sources.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Gemini AI Assistant Card -->
+                    <div id="aiSection" class="ai-assistant-card card">
+                        <div class="card-header-styled ai-header">
+                            <div class="header-with-icon">
+                                <span class="card-icon ai-glow-icon">✨</span>
+                                <div>
+                                    <h3 class="card-heading">Gemini AI Assistant</h3>
+                                    <p class="card-subheading">Supplementary article synthesis, key claim extraction, and linguistic tone scan</p>
+                                </div>
+                            </div>
+                            <button type="button" id="btnRunAi" class="btn-secondary-ai" onclick="fetchAiAnalysis(true)">
+                                <span>🤖 Re-evaluate with AI</span>
+                            </button>
+                        </div>
+
+                        <!-- Mandatory Separation Notices -->
+                        <div class="ai-architecture-notices">
+                            <div class="notice-pill">
+                                <strong>⚖️ Independent Pipeline:</strong> The Real/Fake verdict is produced solely by the ML model. AI assistance is supplementary.
+                            </div>
+                            <div class="notice-pill muted">
+                                <strong>ℹ️ Informational Only:</strong> AI output provides linguistic observations and does not verify real-world truth.
+                            </div>
+                        </div>
+
+                        <!-- AI Loading Skeleton -->
+                        <div id="aiLoading" class="ai-loading-box hidden">
+                            <div class="ai-spinner"></div>
+                            <div class="loading-labels">
+                                <strong>Generating AI Assistant Analysis...</strong>
+                                <span>Synthesizing claims, scanning emotive tone, and distilling summary</span>
+                            </div>
+                        </div>
+
+                        <!-- AI Friendly Fallback Notice -->
+                        <div id="aiErrorBox" class="ai-error-callout hidden">
+                            <span class="callout-icon">ℹ️</span>
+                            <span id="aiErrorMessage">AI analysis is temporarily unavailable. The ML prediction is fully available.</span>
+                        </div>
+
+                        <!-- AI Output Grid -->
+                        <div id="aiContent" class="ai-output-grid hidden">
+                            <div class="ai-subcard">
+                                <div class="subcard-title">📝 Article Summary</div>
+                                <p id="aiSummary" class="subcard-body"></p>
+                            </div>
+
+                            <div class="ai-subcard">
+                                <div class="subcard-title">🔎 Key Claims Extracted</div>
+                                <ul id="aiClaims" class="claims-checklist"></ul>
+                            </div>
+
+                            <div class="ai-subcard">
+                                <div class="subcard-title">🗣️ Linguistic &amp; Tone Analysis</div>
+                                <p class="subcard-note">Stylistic tone observations (linguistic review only, not factual verification):</p>
+                                <ul id="aiLanguage" class="language-observations"></ul>
+                            </div>
+
+                            <div class="ai-subcard">
+                                <div class="subcard-title">🤖 AI Reasoning Overview</div>
+                                <p id="aiExplanation" class="subcard-body"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 2: PREDICTION HISTORY VIEW
+             ========================================== -->
+        <section id="viewHistory" class="tab-view hidden" role="tabpanel" aria-labelledby="tabBtnHistory">
+            <div class="tab-inner-container">
+                <!-- History Header -->
+                <div class="section-hero-header">
+                    <div>
+                        <h2 class="page-title">Prediction History</h2>
+                        <p class="page-subtitle">Search, filter, and inspect stored model predictions with full XAI confidence and model versioning</p>
+                    </div>
+                    <div class="hero-actions">
+                        <button id="btnRefreshHistory" type="button" class="btn-action-outline" onclick="loadHistory(1)">
+                            <span class="btn-icon">🔄</span>
+                            <span>Refresh</span>
+                        </button>
+                        <button id="btnClearHistory" type="button" class="btn-action-danger" onclick="openClearModal()">
+                            <span class="btn-icon">🗑️</span>
+                            <span>Clear History</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter & Search Toolbar -->
+                <div class="history-toolbar card">
+                    <div class="search-box-wrapper">
+                        <span class="search-lens" aria-hidden="true">🔍</span>
+                        <input 
+                            id="historySearch" 
+                            type="search" 
+                            placeholder="Search predictions by headline or keyword..." 
+                            aria-label="Search prediction history"
+                            oninput="onHistorySearchChange()"
+                        >
+                        <button id="btnClearSearch" type="button" class="search-clear-btn hidden" onclick="clearHistorySearch()" aria-label="Clear search input">✕</button>
+                    </div>
+
+                    <div class="filter-group" role="radiogroup" aria-label="Filter by verdict">
+                        <span class="filter-label">Filter:</span>
+                        <button type="button" class="filter-tab active" data-filter="ALL" onclick="setHistoryFilter('ALL')">All</button>
+                        <button type="button" class="filter-tab" data-filter="REAL" onclick="setHistoryFilter('REAL')">🟢 Real News</button>
+                        <button type="button" class="filter-tab" data-filter="FAKE" onclick="setHistoryFilter('FAKE')">🔴 Fake News</button>
+                        <button type="button" class="filter-tab" data-filter="UNCERTAIN" onclick="setHistoryFilter('UNCERTAIN')">🟡 Uncertain</button>
+                    </div>
+                </div>
+
+                <!-- Loading State for History -->
+                <div id="historyLoading" class="history-loading-indicator hidden" role="status">
+                    <div class="ai-spinner"></div>
+                    <span>Loading history records from database...</span>
+                </div>
+
+                <!-- History Records Container -->
+                <div id="historyList" class="history-cards-container" aria-live="polite">
+                    <!-- Populated dynamically by script.js -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="historyEmpty" class="history-empty-state card hidden">
+                    <div class="empty-icon-circle">📂</div>
+                    <h3 class="empty-title">No predictions found</h3>
+                    <p id="historyEmptyText" class="empty-desc">No records match your search criteria. Submit an article in the Analyze tab to save predictions.</p>
+                    <button type="button" class="btn-primary-neon small" onclick="switchTab('detector')">Go to Analyze News →</button>
+                </div>
+
+                <!-- History Pagination Footer -->
+                <div id="historyPagination" class="pagination-footer card">
+                    <div id="paginationInfo" class="pagination-summary">Showing 0 of 0 records</div>
+                    <div class="pagination-controls">
+                        <button id="btnPrevPage" type="button" class="btn-page-ctrl" onclick="changeHistoryPage(-1)" disabled aria-label="Previous page">
+                            ← Previous
+                        </button>
+                        <span id="pageIndicator" class="page-number-badge">Page 1 of 1</span>
+                        <button id="btnNextPage" type="button" class="btn-page-ctrl" onclick="changeHistoryPage(1)" disabled aria-label="Next page">
+                            Next →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 3: ANALYTICS DASHBOARD VIEW
+             ========================================== -->
+        <section id="viewAnalytics" class="tab-view hidden" role="tabpanel" aria-labelledby="tabBtnAnalytics">
+            <div class="tab-inner-container">
+                <!-- Analytics Header -->
+                <div class="section-hero-header">
+                    <div>
+                        <h2 class="page-title">Analytics Dashboard</h2>
+                        <p class="page-subtitle">Real-time classification distribution, confidence metrics, and activity tracking across all stored records</p>
+                    </div>
+                    <button id="btnRefreshAnalytics" type="button" class="btn-action-outline" onclick="loadAnalytics()">
+                        <span class="btn-icon">🔄</span>
+                        <span>Refresh Metrics</span>
+                    </button>
+                </div>
+
+                <!-- 5 Modern KPI Statistic Cards -->
+                <div class="kpi-grid">
+                    <!-- KPI 1: Total -->
+                    <div class="kpi-metric-card card" id="kpiTotalCard">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Total Predictions</span>
+                            <span class="kpi-icon-pill">📊</span>
+                        </div>
+                        <div id="kpiTotal" class="kpi-number">0</div>
+                        <div class="kpi-footnote">Total queries recorded in SQLite</div>
+                    </div>
+
+                    <!-- KPI 2: Real -->
+                    <div class="kpi-metric-card card real-theme" id="kpiRealCard">
+                        <div class="kpi-top">
+                            <span class="kpi-title">REAL News</span>
+                            <span class="kpi-icon-pill green">🟢</span>
+                        </div>
+                        <div class="kpi-number-row">
+                            <span id="kpiReal" class="kpi-number">0</span>
+                            <span id="kpiRealPct" class="kpi-share-badge real">0%</span>
+                        </div>
+                        <div class="kpi-footnote">Credible linguistic structure</div>
+                    </div>
+
+                    <!-- KPI 3: Fake -->
+                    <div class="kpi-metric-card card fake-theme" id="kpiFakeCard">
+                        <div class="kpi-top">
+                            <span class="kpi-title">FAKE News</span>
+                            <span class="kpi-icon-pill red">🔴</span>
+                        </div>
+                        <div class="kpi-number-row">
+                            <span id="kpiFake" class="kpi-number">0</span>
+                            <span id="kpiFakePct" class="kpi-share-badge fake">0%</span>
+                        </div>
+                        <div class="kpi-footnote">Sensational or misleading cues</div>
+                    </div>
+
+                    <!-- KPI 4: Uncertain -->
+                    <div class="kpi-metric-card card uncertain-theme" id="kpiUncertainCard">
+                        <div class="kpi-top">
+                            <span class="kpi-title">UNCERTAIN</span>
+                            <span class="kpi-icon-pill amber">🟡</span>
+                        </div>
+                        <div class="kpi-number-row">
+                            <span id="kpiUncertain" class="kpi-number">0</span>
+                            <span id="kpiUncertainPct" class="kpi-share-badge uncertain">0%</span>
+                        </div>
+                        <div class="kpi-footnote">Neutral or ambiguous vocabulary</div>
+                    </div>
+
+                    <!-- KPI 5: Avg Confidence -->
+                    <div class="kpi-metric-card card conf-theme" id="kpiConfidenceCard">
+                        <div class="kpi-top">
+                            <span class="kpi-title">Average Confidence</span>
+                            <span class="kpi-icon-pill cyan">🎯</span>
+                        </div>
+                        <div id="kpiAvgConfidence" class="kpi-number cyan-glow">0%</div>
+                        <div class="kpi-footnote">Mean model decision probability</div>
+                    </div>
+                </div>
+
+                <!-- Visual Charts Grid -->
+                <div class="dashboard-charts-grid">
+                    <!-- Chart 1: Distribution Breakdown -->
+                    <div class="chart-box card">
+                        <div class="chart-box-header">
+                            <div>
+                                <h3 class="chart-title">Prediction Distribution</h3>
+                                <p class="chart-subtitle">Proportion of REAL vs FAKE vs UNCERTAIN classifications</p>
+                            </div>
+                            <span class="chart-pill">Live Ratio</span>
+                        </div>
+
+                        <!-- Segmented Distribution Bar -->
+                        <div class="stacked-distribution-bar" role="progressbar" aria-label="Category Distribution">
+                            <div id="barReal" class="bar-slice real" style="width: 33.3%;" title="REAL News"></div>
+                            <div id="barFake" class="bar-slice fake" style="width: 33.3%;" title="FAKE News"></div>
+                            <div id="barUncertain" class="bar-slice uncertain" style="width: 33.4%;" title="UNCERTAIN"></div>
+                        </div>
+
+                        <!-- Donut Visual & Legend Row -->
+                        <div class="distribution-details-layout">
+                            <!-- SVG Donut Chart -->
+                            <div class="donut-chart-box">
+                                <svg id="donutSvg" viewBox="0 0 200 200" class="donut-vector" role="img" aria-label="Donut distribution graph">
+                                    <!-- Rendered dynamically by script.js -->
+                                </svg>
+                                <div class="donut-center-overlay">
+                                    <span id="donutCenterTotal" class="donut-big-val">0</span>
+                                    <span class="donut-sub-text">Total</span>
+                                </div>
+                            </div>
+
+                            <!-- Legend Cards -->
+                            <div class="distribution-legend-col">
+                                <div class="legend-card-item real">
+                                    <div class="legend-row">
+                                        <span class="legend-dot-bubble real"></span>
+                                        <span class="legend-name">REAL NEWS</span>
+                                    </div>
+                                    <span id="legendRealVal" class="legend-stat-num">0 (0%)</span>
+                                </div>
+                                <div class="legend-card-item fake">
+                                    <div class="legend-row">
+                                        <span class="legend-dot-bubble fake"></span>
+                                        <span class="legend-name">FAKE NEWS</span>
+                                    </div>
+                                    <span id="legendFakeVal" class="legend-stat-num">0 (0%)</span>
+                                </div>
+                                <div class="legend-card-item uncertain">
+                                    <div class="legend-row">
+                                        <span class="legend-dot-bubble uncertain"></span>
+                                        <span class="legend-name">UNCERTAIN</span>
+                                    </div>
+                                    <span id="legendUncertainVal" class="legend-stat-num">0 (0%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Daily Activity Timeline -->
+                    <div class="chart-box card">
+                        <div class="chart-box-header">
+                            <div>
+                                <h3 class="chart-title">Prediction Activity Over Time</h3>
+                                <p class="chart-subtitle">Daily evaluation volume segmented by classification</p>
+                            </div>
+                            <span class="chart-pill">Timeline</span>
+                        </div>
+
+                        <div class="timeline-visualization-area">
+                            <div id="activityChartContainer" class="timeline-bar-columns">
+                                <!-- Populated dynamically by script.js -->
+                            </div>
+                            <div class="timeline-legend-row">
+                                <span class="legend-mini"><span class="legend-dot-bubble real"></span> Real</span>
+                                <span class="legend-mini"><span class="legend-dot-bubble fake"></span> Fake</span>
+                                <span class="legend-mini"><span class="legend-dot-bubble uncertain"></span> Uncertain</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Feed -->
+                <div class="recent-feed-card card">
+                    <div class="chart-box-header">
+                        <div>
+                            <h3 class="chart-title">🕒 Recent Prediction Activity</h3>
+                            <p class="chart-subtitle">Most recent evaluations recorded in database</p>
+                        </div>
+                        <button type="button" class="btn-link" onclick="switchTab('history')">View Full History →</button>
+                    </div>
+                    <div id="recentActivityList" class="recent-items-stream">
+                        <!-- Populated dynamically by script.js -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Clear History Confirmation Dialog Modal -->
+    <div id="clearHistoryModal" class="modal-scrim hidden" role="dialog" aria-modal="true" aria-labelledby="clearModalTitle">
+        <div class="modal-dialog-box card">
+            <div class="modal-header-line">
+                <div class="modal-title-wrap">
+                    <span class="modal-alert-icon">⚠️</span>
+                    <h3 id="clearModalTitle" class="modal-heading">Clear All Prediction History?</h3>
+                </div>
+                <button type="button" class="modal-close-x" onclick="closeClearModal()" aria-label="Close dialog">✕</button>
+            </div>
+            <p class="modal-body-copy">
+                Are you sure you want to delete all stored news prediction records from the SQLite database? This action is permanent and cannot be undone.
             </p>
+            <div class="modal-btn-row">
+                <button type="button" class="btn-action-outline" onclick="closeClearModal()">Cancel</button>
+                <button type="button" class="btn-action-danger" onclick="confirmClearHistory()">Yes, Clear All History</button>
+            </div>
         </div>
     </div>
 </div>
