@@ -1,0 +1,6 @@
+{
+  "name": "Fake News Detection",
+  "description": "AI-powered news verification and fake news detection system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

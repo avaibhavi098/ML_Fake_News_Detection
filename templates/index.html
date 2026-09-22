@@ -2,17 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered news verification and fake news detection system.">
+    <meta property="og:title" content="Fake News Detection">
+    <meta property="og:description" content="AI-powered news verification and fake news detection system.">
     <title>Fake News Detection</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
 <div class="container">
     <h1>📰 Fake News Detection System</h1>
-    <p class="subtitle">AI-powered news verification</p>
+    <p class="subtitle">AI-powered news verification <span class="version-tag">v2.0.0</span></p>
 
     <textarea id="newsText" placeholder="Paste news here..."></textarea>
-    <button onclick="checkNews()">Check News</button>
+    
+    <div class="sample-actions">
+        <span class="sample-label">Try sample:</span>
+        <button type="button" class="btn-sample" onclick="fillSample('real')">Real</button>
+        <button type="button" class="btn-sample" onclick="fillSample('fake')">Fake</button>
+        <button type="button" class="btn-sample" onclick="fillSample('uncertain')">Uncertain</button>
+        <button type="button" class="btn-sample btn-clear" onclick="fillSample('clear')">Clear</button>
+    </div>
+
+    <button id="btnCheck" onclick="checkNews()">Check News</button>
 
     <div id="resultBox" class="hidden">
         <h2 id="prediction"></h2>
@@ -26,7 +39,7 @@
 
         <div class="explain">
             <h3>🧠 Explanation</h3>
-            <p>
+            <p id="explainText">
                 The model analyzes word frequency, sensational language,
                 and linguistic patterns common in fake news.
             </p>
@@ -34,6 +47,6 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+<script src="/static/script.js"></script>
 </body>
 </html>
